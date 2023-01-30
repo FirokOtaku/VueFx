@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.web.WebView?>
+
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="firok.spring.vuefx.VueFxController">
+    <center> <WebView fx:id="webview"/> </center>
+</BorderPane>
+
+
