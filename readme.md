@@ -21,11 +21,18 @@
 
 ## 如何使用
 
-> 本项目默认基于 Java 19
+> 本项目基于 **Java 19**
 
 * 引入本项目作为依赖
-* 创建原生 Web 页面和相关资源, 需在页面内使用标签引入 vue.js (`<script src='/firok/spring/vuefx/vue.js'></script>`)
+* 创建原生 Web 页面和相关资源
+  * 页面 JavaScript 脚本 可以**可以** 提供一个 `function VueFxPostInit()`, 此方法会在环境初始化 **完成后** 调用
+  * 如需使用 Vue.js, 可在页面内使用标签引入 (`<script src='/firok/spring/vuefx/vue.js'></script>`)
 * 创建 JavaFX controller 类, 需继承自 `firok.spring.vuefx.VueFxController`
 * 创建 JavaFX application 类, 需继承自 `firok.spring.vuefx.VueFxApplicationFx`
 * 创建 Spring Boot Application 类, 在 main 方法内执行 `javafx.application.Application.launch(AnyVueFxApplication.class);` (将类名替换为上一步创建的类)
 * 启动项目
+
+> **关于环境初始化**  
+> Web 页面加载完成后,
+> JavaFX application 实例和 controller 实例会设置为全局变量 `VueFxApplication` 和 `VueFxController`.
+> 可以在 JavaScript 环境内调用这两个实例的成员来跟 Java 侧程序做交互

@@ -16,9 +16,9 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @implNote 这个类需要工作在 Spring Boot 环境下
  * */
-public abstract class VueFxApplicationFx extends Application
+public abstract class VueFxApplicationFx<TypeController extends VueFxController> extends Application
 {
-	public static final Version VERSION = new Version(0, 1, 0);
+	public static final Version VERSION = new Version(0, 2, 0);
 
 	static // 加载 classpath URL 协议
 	{
@@ -26,11 +26,11 @@ public abstract class VueFxApplicationFx extends Application
 	}
 
 	protected final Class<?> classSpringApplication;
-	protected final Class<? extends VueFxController> classController;
+	protected final Class<TypeController> classController;
 	protected final String url;
 	protected VueFxApplicationFx(
 			Class<?> classSpringApplication,
-			Class<? extends VueFxController> classController,
+			Class<TypeController> classController,
 			String url
 	)
 	{
@@ -45,46 +45,41 @@ public abstract class VueFxApplicationFx extends Application
 	protected ConfigurableApplicationContext context;
 
 	@Override
-	public void init()
+	public void init() throws Exception
 	{
 		context = new SpringApplicationBuilder(classSpringApplication).run();
 	}
 
-	protected VueFxController controller;
+	protected TypeController controller;
 
 	@Override
-	public void start(Stage stage)
+	public void start(Stage stage) throws Exception
 	{
-		try
-		{
-			var fxSource = new ClassPathResource("/firok/spring/vuefx/vuefx.fxml");
-			var fxLoader = new FXMLLoader();
-			fxLoader.setLocation(fxSource.getURL());
-			fxLoader.setControllerFactory(c -> {
-				try { return classController.getConstructor().newInstance(); }
-				catch (Exception any) { throw new RuntimeException(any); }
-			});
-			var sceneContent = fxLoader.<Parent>load();
-			var scene = new Scene(sceneContent);
-			this.controller = fxLoader.getController();
+		var fxSource = new ClassPathResource("/firok/spring/vuefx/vuefx.fxml");
+		var fxLoader = new FXMLLoader();
+		fxLoader.setLocation(fxSource.getURL());
+		fxLoader.setControllerFactory(c -> {
+			try { return classController.getConstructor().newInstance(); }
+			catch (Exception any) { throw new RuntimeException(any); }
+		});
+		var sceneContent = fxLoader.<Parent>load();
+		var scene = new Scene(sceneContent);
+		this.controller = fxLoader.getController();
 
-			controller.stage = stage;
-			stage.setScene(scene);
-			var engine = this.controller.webview.getEngine();
-			engine.setOnError(error -> System.err.println("error: " + error));
-			engine.setOnAlert(alert -> System.err.println("alert: " + alert));
-			engine.load(url);
-			engine.getLoadWorker().stateProperty().addListener(state -> {
-				controller.window = (JSObject) engine.executeScript("window");
-				controller.set("VueFxApplication", this);
-				controller.set("VueFxController", controller);
-				engine.executeScript("VueFxPostInit()");
-				controller.postInit();
-				stage.show();
-			});
-
-		}
-		catch (Exception any) { throw new RuntimeException(any); }
+		controller.stage = stage;
+		stage.setScene(scene);
+		var engine = this.controller.webview.getEngine();
+		engine.setOnError(error -> System.err.println("error: " + error));
+		engine.setOnAlert(alert -> System.err.println("alert: " + alert));
+		engine.load(url);
+		engine.getLoadWorker().stateProperty().addListener(state -> {
+			controller.window = (JSObject) engine.executeScript("window");
+			controller.set("VueFxApplication", this);
+			controller.set("VueFxController", controller);
+			engine.executeScript("typeof VueFxPostInit === 'function' ? VueFxPostInit() : undefined");
+			controller.postInit();
+			stage.show();
+		});
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package firok.spring.vuefx;
 
-public class VueFxTestFxApplication extends VueFxApplicationFx
+public class VueFxTestFxApplication extends VueFxApplicationFx<VueFxTestController>
 {
 
 	public VueFxTestFxApplication()

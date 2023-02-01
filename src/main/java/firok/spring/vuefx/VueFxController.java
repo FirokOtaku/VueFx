@@ -7,7 +7,7 @@ import netscape.javascript.JSObject;
 
 public abstract class VueFxController
 {
-	Stage stage;
+	protected Stage stage;
 
 	@FXML
 	WebView webview;
